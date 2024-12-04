@@ -1,5 +1,14 @@
 1. Loose thoughts on the project
-    - Rocket and Mission would be entities in the target project so ID would come from a sequence generator
+    - Rocket and Mission would be entities in the target project
+        - ID would come from a sequence generator
+        - OneToMany relation between Mission and Rockets would by used
+        - Methods updating entities would be transactional
+    - Assuming that the name of rocket and mission are the unique identifiers
     - When adding multiple rockets to a mission if any of the rockets is already assigned non of the rockets is added - I figured this makes sense when planning a mission in space
+    - Assuming it is not possible to assign a rocket in repair to a mission
     - Assuming mission is automatically started when rocket is assigned
     - Assuming that ending a mission resets rockets status to ON_GROUND unless the rocket is in repair
+    - Assuming can end mission at any point even if not in progress
+
+    - In the example Luna mission is pending with two rockets on the ground.. this is something I would discuss with the business
+    - I assumed adding a rocket to a mission means send the rocket to space

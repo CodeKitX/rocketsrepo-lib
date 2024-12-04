@@ -1,5 +1,6 @@
 package com.six.rocketsrepo;
 
+import com.six.rocketsrepo.exceptions.RocketAlreadyExistsException;
 import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
@@ -13,11 +14,19 @@ class RocketRepositoryLocal implements RocketRepository {
     @Override
     public void addRocket(Rocket rocket) {
         log.debug("Adding a rocket {}", rocket);
+        findRocketByName(rocket.getName()).ifPresentOrElse(
+                r -> {
+                    throw new RocketAlreadyExistsException(rocket.getName());
+                },
+                () -> rocketsDb.add(rocket)
+        );
     }
 
     @Override
     public Optional<Rocket> findRocketByName(String rocketName) {
-        return Optional.empty();
+        return rocketsDb.stream()
+                .filter(r -> r.getName().equals(rocketName))
+                .findFirst();
     }
 
     @Override

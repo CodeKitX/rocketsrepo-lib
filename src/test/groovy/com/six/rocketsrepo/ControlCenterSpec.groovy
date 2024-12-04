@@ -50,7 +50,7 @@ class ControlCenterSpec extends Specification {
     }
 
     def "should add a new mission"() {
-        given;
+        given:
         def missionsCount = missionRepo.getMissions().size()
 
         when:
@@ -58,6 +58,17 @@ class ControlCenterSpec extends Specification {
 
         then:
         missionRepo.getMissions().size() == missionsCount + 1
+    }
+
+    def "should not duplicate missions"() {
+        given:
+        controlCenter.scheduleMission(MISSION_1)
+
+        when:
+        controlCenter.scheduleMission(MISSION_1)
+
+        then:
+        thrown(MissionAlreadyExistsException)
     }
 
     def "should assign a rocket to a mission"() {
@@ -103,6 +114,17 @@ class ControlCenterSpec extends Specification {
         thrown(RocketAlreadyAssignedException)
     }
 
+    def "should not assign a non existing rocket assigned to mission"() {
+        given:
+        controlCenter.scheduleMission(MISSION_1)
+
+        when:
+        controlCenter.assignRocketToMission(FALCON_9, MISSION_1)
+
+        then:
+        thrown(RocketDoesNotExistException)
+    }
+
 
     def "should change rocket status after rocket is assigned to mission"() {
         given:
@@ -116,7 +138,6 @@ class ControlCenterSpec extends Specification {
         rocketRepo.findRocketByName(FALCON_9)
                 .orElseThrow()
                 .getStatus() == RocketStatus.IN_SPACE
-
     }
 
     def "should assign multiple rockets to mission"() {
@@ -188,19 +209,7 @@ class ControlCenterSpec extends Specification {
                 .getStatus() == RocketStatus.IN_SPACE
     }
 
-    def "should not duplicate missions"() {
-        given:
-        controlCenter.scheduleMission(MISSION_1)
-
-        when:
-        controlCenter.scheduleMission(MISSION_1)
-
-        then:
-        thrown(MissionAlreadyExistsException)
-
-    }
-
-    def "should start mission when assigned rockets status changes"() {
+    def "should start mission when rockets assigned"() {
         given:
         controlCenter.scheduleMission(MISSION_1)
         controlCenter.addRocket(FALCON_9)
@@ -269,7 +278,7 @@ class ControlCenterSpec extends Specification {
                 .getStatus() == MissionStatus.ENDED
     }
 
-    def "should release all rockets after mission has ended"() {
+    def "should release all rockets in space after mission has ended"() {
         given:
         controlCenter.scheduleMission(MISSION_1)
         controlCenter.addRocket(FALCON_9)
@@ -281,12 +290,12 @@ class ControlCenterSpec extends Specification {
         controlCenter.endMission(MISSION_1)
 
         then:
-        rocketRepo.findRocketByName(FALCON_9)
-                .orElseThrow()
-                .getStatus() == RocketStatus.ON_GROUND
-        rocketRepo.findRocketByName(RED_DRAGON)
-                .orElseThrow()
-                .getStatus() == RocketStatus.ON_GROUND
+        def rocket1 = rocketRepo.findRocketByName(FALCON_9).orElseThrow()
+        rocket1.getStatus() == RocketStatus.ON_GROUND
+        rocket1.getMissionName() == null
+        def rocket2 = rocketRepo.findRocketByName(RED_DRAGON).orElseThrow()
+        rocket2.getStatus() == RocketStatus.ON_GROUND
+        rocket2.getMissionName() == null
     }
 
     def "should keep a rocket in repair after mission has ended"() {
@@ -302,11 +311,11 @@ class ControlCenterSpec extends Specification {
         controlCenter.endMission(MISSION_1)
 
         then:
-        rocketRepo.findRocketByName(FALCON_9)
-                .orElseThrow()
-                .getStatus() == RocketStatus.IN_REPAIR
-        rocketRepo.findRocketByName(RED_DRAGON)
-                .orElseThrow()
-                .getStatus() == RocketStatus.ON_GROUND
+        def rocket1 = rocketRepo.findRocketByName(FALCON_9).orElseThrow()
+        rocket1.getStatus() == RocketStatus.IN_REPAIR
+        rocket1.getMissionName() == null
+        def rocket2 = rocketRepo.findRocketByName(RED_DRAGON).orElseThrow()
+        rocket2.getStatus() == RocketStatus.ON_GROUND
+        rocket2.getMissionName() == null
     }
 }
