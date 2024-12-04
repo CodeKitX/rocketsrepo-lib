@@ -1,39 +1,45 @@
 package com.six.rocketsrepo;
 
+import com.six.rocketsrepo.exceptions.RocketDoesNotExistException;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+
 import java.util.List;
 import java.util.Set;
 
+@RequiredArgsConstructor
 public class ControlCenter {
+    private final RocketRepository rocketRepository;
+    private final MissionRepository missionRepository;
 
-    void addRocket(Rocket rocket) {
+    void addRocket(String rocketName) {
+        Rocket rocket = new Rocket(rocketName);
+        rocketRepository.addRocket(rocket);
+    }
+
+    void scheduleMission(String missionName) {
+        Mission mission = new Mission(missionName);
+        missionRepository.addMission(mission);
 
     }
 
-    void scheduleMission(Mission mission) {
+    void assignRocketToMission(String rocketName, String missionName) {
 
     }
 
-    void assignRocket(Rocket rocket, Mission mission) {
+    void assignRocketsToMission(List<String> rocketNames, String missionName) {
 
     }
 
-    void assignRockets(Set<Rocket> rockets, Mission mission) {
+    void sendRocketToRepair(String rocketName) {
 
     }
 
-    void startMission(Mission mission) {
+    void releaseRocketFromRepair(String rocketName) {
 
     }
 
-    void endMission(Mission mission) {
-
-    }
-
-    void sendRocketToRepair(Rocket rocket) {
-
-    }
-
-    void releaseRocketFromRepari(Rocket rocket) {
+    void endMission(String missionName) {
 
     }
 
